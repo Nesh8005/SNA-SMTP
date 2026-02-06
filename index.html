@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNA Lab: SMTP Server Guide</title>
+    <link rel="stylesheet" href="index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Fira+Code&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <i class="fas fa-server"></i>
+                <span>SNA GUIDE</span>
+            </div>
+            <ul class="nav-list">
+                <li class="nav-item"><a href="#smtp-mail-server-setup-lab-fresh-installation-guide" class="nav-link lvl-1">SMTP Mail Server Setup Lab - Fresh Installation Guide</a></li>
+<li class="nav-item"><a href="#complete-step-by-step-with-screenshot-explanation-requirements" class="nav-link lvl-2">Complete Step-by-Step with Screenshot & Explanation Requirements</a></li>
+<li class="nav-item"><a href="#lab-requirements" class="nav-link lvl-2">Lab Requirements</a></li>
+<li class="nav-item"><a href="#what-you-need" class="nav-link lvl-3">What You Need</a></li>
+<li class="nav-item"><a href="#ip-configuration" class="nav-link lvl-3">IP Configuration</a></li>
+<li class="nav-item"><a href="#user-account" class="nav-link lvl-3">User Account</a></li>
+<li class="nav-item"><a href="#part-1-rocky-linux-server-setup" class="nav-link lvl-1">PART 1: ROCKY LINUX SERVER SETUP</a></li>
+<li class="nav-item"><a href="#phase-1-initial-system-configuration" class="nav-link lvl-2">Phase 1: Initial System Configuration</a></li>
+<li class="nav-item"><a href="#step-1-create-user-account" class="nav-link lvl-3">Step 1: Create User Account</a></li>
+<li class="nav-item"><a href="#step-2-set-hostname" class="nav-link lvl-3">Step 2: Set Hostname</a></li>
+<li class="nav-item"><a href="#step-3-configure-hosts-file" class="nav-link lvl-3">Step 3: Configure Hosts File</a></li>
+<li class="nav-item"><a href="#step-4-network-verification" class="nav-link lvl-3">Step 4: Network Verification</a></li>
+<li class="nav-item"><a href="#step-5-install-required-packages" class="nav-link lvl-3">Step 5: Install Required Packages</a></li>
+<li class="nav-item"><a href="#phase-2-ssl-tls-certificate-generation" class="nav-link lvl-2">Phase 2: SSL/TLS Certificate Generation</a></li>
+<li class="nav-item"><a href="#step-6-generate-self-signed-certificate" class="nav-link lvl-3">Step 6: Generate Self-Signed Certificate</a></li>
+<li class="nav-item"><a href="#step-7-set-proper-certificate-permissions" class="nav-link lvl-3">Step 7: Set Proper Certificate Permissions</a></li>
+<li class="nav-item"><a href="#phase-3-postfix-configuration" class="nav-link lvl-2">Phase 3: Postfix Configuration</a></li>
+<li class="nav-item"><a href="#step-8-backup-original-configuration" class="nav-link lvl-3">Step 8: Backup Original Configuration</a></li>
+<li class="nav-item"><a href="#step-9-edit-postfix-main-configuration" class="nav-link lvl-3">Step 9: Edit Postfix Main Configuration</a></li>
+<li class="nav-item"><a href="#step-10-configure-postfix-master-ports-configuration" class="nav-link lvl-3">Step 10: Configure Postfix Master (Ports Configuration)</a></li>
+<li class="nav-item"><a href="#phase-4-dovecot-configuration" class="nav-link lvl-2">Phase 4: Dovecot Configuration</a></li>
+<li class="nav-item"><a href="#step-11-configure-dovecot-mail-location" class="nav-link lvl-3">Step 11: Configure Dovecot Mail Location</a></li>
+<li class="nav-item"><a href="#step-12-configure-dovecot-ssl" class="nav-link lvl-3">Step 12: Configure Dovecot SSL</a></li>
+<li class="nav-item"><a href="#step-13-configure-dovecot-authentication" class="nav-link lvl-3">Step 13: Configure Dovecot Authentication</a></li>
+<li class="nav-item"><a href="#step-14-configure-dovecot-for-postfix-sasl" class="nav-link lvl-3">Step 14: Configure Dovecot for Postfix SASL</a></li>
+<li class="nav-item"><a href="#phase-5-firewall-configuration" class="nav-link lvl-2">Phase 5: Firewall Configuration</a></li>
+<li class="nav-item"><a href="#step-15-configure-firewalld" class="nav-link lvl-3">Step 15: Configure Firewalld</a></li>
+<li class="nav-item"><a href="#phase-6-start-and-enable-services" class="nav-link lvl-2">Phase 6: Start and Enable Services</a></li>
+<li class="nav-item"><a href="#step-16-start-postfix" class="nav-link lvl-3">Step 16: Start Postfix</a></li>
+<li class="nav-item"><a href="#step-17-start-dovecot" class="nav-link lvl-3">Step 17: Start Dovecot</a></li>
+<li class="nav-item"><a href="#phase-7-verification" class="nav-link lvl-2">Phase 7: Verification</a></li>
+<li class="nav-item"><a href="#step-18-verify-listening-ports" class="nav-link lvl-3">Step 18: Verify Listening Ports</a></li>
+<li class="nav-item"><a href="#step-19-test-local-smtp-port-25" class="nav-link lvl-3">Step 19: Test Local SMTP (Port 25)</a></li>
+<li class="nav-item"><a href="#step-20-test-smtp-with-starttls" class="nav-link lvl-3">Step 20: Test SMTP with STARTTLS</a></li>
+<li class="nav-item"><a href="#step-21-test-smtps-port-465" class="nav-link lvl-3">Step 21: Test SMTPS (Port 465)</a></li>
+<li class="nav-item"><a href="#step-22-test-submission-port-587" class="nav-link lvl-3">Step 22: Test Submission (Port 587)</a></li>
+<li class="nav-item"><a href="#step-23-test-imaps-port-993" class="nav-link lvl-3">Step 23: Test IMAPS (Port 993)</a></li>
+<li class="nav-item"><a href="#step-24-send-test-email-locally" class="nav-link lvl-3">Step 24: Send Test Email Locally</a></li>
+<li class="nav-item"><a href="#step-25-verify-email-was-queued" class="nav-link lvl-3">Step 25: Verify Email Was Queued</a></li>
+<li class="nav-item"><a href="#step-26-retrieve-email-via-imap" class="nav-link lvl-3">Step 26: Retrieve Email via IMAP</a></li>
+<li class="nav-item"><a href="#rocky-server-setup-complete" class="nav-link lvl-2">Rocky Server Setup Complete</a></li>
+<li class="nav-item"><a href="#part-2-ubuntu-client-setup" class="nav-link lvl-1">PART 2: UBUNTU CLIENT SETUP</a></li>
+<li class="nav-item"><a href="#phase-8-ubuntu-client-configuration" class="nav-link lvl-2">Phase 8: Ubuntu Client Configuration</a></li>
+<li class="nav-item"><a href="#step-27-configure-hosts-file-on-ubuntu" class="nav-link lvl-3">Step 27: Configure Hosts File on Ubuntu</a></li>
+<li class="nav-item"><a href="#step-27-test-connectivity-to-mail-server" class="nav-link lvl-3">Step 27: Test Connectivity to Mail Server</a></li>
+<li class="nav-item"><a href="#phase-9-thunderbird-installation" class="nav-link lvl-2">Phase 9: Thunderbird Installation</a></li>
+<li class="nav-item"><a href="#step-28-download-thunderbird" class="nav-link lvl-3">Step 28: Download Thunderbird</a></li>
+<li class="nav-item"><a href="#step-29-extract-thunderbird" class="nav-link lvl-3">Step 29: Extract Thunderbird</a></li>
+<li class="nav-item"><a href="#step-30-install-thunderbird" class="nav-link lvl-3">Step 30: Install Thunderbird</a></li>
+<li class="nav-item"><a href="#step-31-launch-thunderbird" class="nav-link lvl-3">Step 31: Launch Thunderbird</a></li>
+<li class="nav-item"><a href="#phase-10-certificate-import-thunderbird-configuration" class="nav-link lvl-2">Phase 10: Certificate Import & Thunderbird Configuration</a></li>
+<li class="nav-item"><a href="#step-32-transfer-certificate-to-client" class="nav-link lvl-3">Step 32: Transfer Certificate to Client</a></li>
+<li class="nav-item"><a href="#step-33-import-certificate-to-thunderbird" class="nav-link lvl-3">Step 33: Import Certificate to Thunderbird</a></li>
+<li class="nav-item"><a href="#step-34-configure-account-server-settings" class="nav-link lvl-3">Step 34: Configure Account & Server Settings</a></li>
+<li class="nav-item"><a href="#step-35-import-certificate-disable-ocsp" class="nav-link lvl-3">Step 35: Import Certificate & Disable OCSP</a></li>
+<li class="nav-item"><a href="#step-36-finalize-connection-handle-exception" class="nav-link lvl-3">Step 36: Finalize Connection & Handle Exception</a></li>
+<li class="nav-item"><a href="#step-37-verify-success-send-receive" class="nav-link lvl-3">Step 37: Verify Success (Send & Receive)</a></li>
+<li class="nav-item"><a href="#troubleshooting-guide" class="nav-link lvl-2">🛠️ TROUBLESHOOTING GUIDE</a></li>
+<li class="nav-item"><a href="#issue-internet-connectivity-lost-after-hostname-change" class="nav-link lvl-3">Issue: Internet Connectivity Lost After Hostname Change</a></li>
+<li class="nav-item"><a href="#issue-thunderbird-hangs-at-checking-password-or-no-information-available" class="nav-link lvl-3">Issue: Thunderbird Hangs at "Checking Password" or "No Information Available"</a></li>
+<li class="nav-item"><a href="#issue-failed-to-connect-authentication-error" class="nav-link lvl-3">Issue: Failed to Connect (Authentication Error)</a></li>
+<li class="nav-item"><a href="#issue-is-the-server-broken-or-the-client-local-testing" class="nav-link lvl-3">Issue: Is the Server Broken or the Client? (Local Testing)</a></li>
+<li class="nav-item"><a href="#lab-complete" class="nav-link lvl-2">LAB COMPLETE</a></li>
+            </ul>
+        </aside>
+        
+        <main class="main-content">
+            <h1 id="smtp-mail-server-setup-lab-fresh-installation-guide" class="main-heading animate">📧 SMTP Mail Server Setup Lab - Fresh Installation Guide</h1>
+<h2 id="complete-step-by-step-with-screenshot-explanation-requirements" class="animate">Complete Step-by-Step with Screenshot & Explanation Requirements</h2>
+<div class="notes-alert animate"><p><strong>🎯 Purpose:</strong> This guide is designed for you to follow while setting up a FRESH Rocky Linux mail server and Ubuntu client. Take a screenshot after EVERY command and document what each command does.</p></div>
+<div class="section-divider"></div>
+<h2 id="lab-requirements" class="animate">🎯 Lab Requirements</h2>
+<h3 id="what-you-need" class="animate">What You Need</h3>
+<div class="req-grid animate">
+<div class="req-item"><i class="fas fa-check-circle"></i><span>Fresh Rocky Linux VM (for mail server)</span></div>
+<div class="req-item"><i class="fas fa-check-circle"></i><span>Fresh Ubuntu VM (for mail client)</span></div>
+<div class="req-item"><i class="fas fa-check-circle"></i><span>VirtualBox NAT Network configured</span></div>
+<div class="req-item"><i class="fas fa-check-circle"></i><span>Screenshot tool ready (Snipping Tool, ShareX, etc.)</span></div>
+<div class="req-item"><i class="fas fa-check-circle"></i><span>This guide open on your host machine</span></div>
+</div>
+<h3 id="ip-configuration" class="animate">IP Configuration</h3>
+<li class="animate" style="color:var(--text-secondary); margin-left:1.5rem; margin-bottom:0.5rem"><strong>Rocky Linux (Server):</strong> 192.168.200.3</li>
+<li class="animate" style="color:var(--text-secondary); margin-left:1.5rem; margin-bottom:0.5rem"><strong>Ubuntu (Client):</strong> 192.168.200.80</li>
+<li class="animate" style="color:var(--text-secondary); margin-left:1.5rem; margin-bottom:0.5rem"><strong>Gateway:</strong> 192.168.200.2</li>
+<li class="animate" style="color:var(--text-secondary); margin-left:1.5rem; margin-bottom:0.5rem"><strong>Domain:</strong> bungkus.org</li>
+<li class="animate" style="color:var(--text-secondary); margin-left:1.5rem; margin-bottom:0.5rem"><strong>FQDN:</strong> bnaserver.bungkus.org</li>
+<h3 id="user-account" class="animate">User Account</h3>
+<li class="animate" style="color:var(--text-secondary); margin-left:1.5rem; margin-bottom:0.5rem"><strong>Username:</strong> dineesh</li>
+<li class="animate" style="color:var(--text-secondary); margin-left:1.5rem; margin-bottom:0.5rem"><strong>Password:</strong> Lab2026</li>
+<div class="section-divider"></div>
+<div class="section-divider"></div>
+<h1 id="part-1-rocky-linux-server-setup" class="main-heading animate">PART 1: ROCKY LINUX SERVER SETUP</h1>
+<h2 id="phase-1-initial-system-configuration" class="animate">Phase 1: Initial System Configuration</h2>
+<h3 id="step-1-create-user-account" class="animate">Step 1: Create User Account</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo adduser dineesh</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Creates a new system user account named "dineesh" that will be used for email authentication. Mail servers use Linux system accounts for user authentication.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">The system creates the user and prepares the home directory.</div></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="1320" height="213" alt="Screenshot 2026-02-05 090259" src="https://github.com/user-attachments/assets/384e72c5-a5a1-42f0-9115-d06b14108052" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo passwd dineesh</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Sets the password "Lab2026" for the dineesh user account. This password will be used later for SMTP/IMAP authentication.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">The user password is successfully set and verified.</div></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="1569" height="384" alt="Screenshot 2026-02-05 091115" src="https://github.com/user-attachments/assets/b71a21fe-df88-4cf3-8120-29f38dea7112" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h3 id="step-2-set-hostname" class="animate">Step 2: Set Hostname</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo hostnamectl set-hostname bnaserver.bungkus.org</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Sets the Fully Qualified Domain Name (FQDN) of the server, which is critical for identification, SSL certificates, and mail routing.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">The static hostname is updated for the server.</div></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="2074" height="184" alt="Screenshot 2026-02-05 091311" src="https://github.com/user-attachments/assets/555efc67-d7bd-4c9e-9fdc-82847b697bbb" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>hostnamectl</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Verifies the hostname was set correctly and displays general system information.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Displays the static hostname as "bnaserver.bungkus.org".</div></div>
+    <div class="notes-alert" style="margin: 1.5rem 0 0;"><p>If the command prompt still shows the old name, try closing and reopening the terminal.</p></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="1523" height="809" alt="Screenshot 2026-02-05 091411" src="https://github.com/user-attachments/assets/47f329a0-9e59-4baf-8e76-5ab1e5d90385" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>hostname -f</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Displays only the FQDN (Fully Qualified Domain Name) for a quick verification check.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Outputs `bnaserver.bungkus.org`.</div></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="948" height="192" alt="Screenshot 2026-02-05 091438" src="https://github.com/user-attachments/assets/72db8e84-30b5-466c-b4e3-8d424b7dbd01" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h3 id="step-3-configure-hosts-file" class="animate">Step 3: Configure Hosts File</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo nano /etc/hosts</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Opens the local hosts file to map IP addresses to hostnames, ensuring the server can resolve its own FQDN without external DNS.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">The nano editor opens the `/etc/hosts` file.</div></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="1242" height="146" alt="Screenshot 2026-02-05 091525" src="https://github.com/user-attachments/assets/9a1a0a64-72bb-47e0-b4c0-b089c22e88a0" /></div>
+      <div class="img-container"><img loading="lazy" width="2531" height="1529" alt="Screenshot 2026-02-05 091601" src="https://github.com/user-attachments/assets/f84f8b68-c2a4-4b2e-a9d3-cce78f9c3651" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** Add entry <code>192.168.200.3 bnaserver.bungkus.org bnaserver</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Maps the server's IP to its FQDN locally, which is essential for mail services to identify themselves correctly.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Local name resolution for the server's FQDN is established.</div></div>
+    <div class="notes-alert" style="margin: 1.5rem 0 0;"><p>This manual mapping ensures the server can identify itself correctly even without a DNS server.</p></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="2226" height="277" alt="Screenshot 2026-02-05 091648" src="https://github.com/user-attachments/assets/839505f1-3441-4693-9332-c8b76dddce1a" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code></code></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="2359" height="261" alt="Screenshot 2026-02-05 091753" src="https://github.com/user-attachments/assets/ffaa4f5a-77d8-4ba1-995f-de4af5ec2f8e" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>cat /etc/hosts</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Displays the contents of the hosts file to verify that the manual mapping was saved correctly.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Shows the updated list of local IP-to-hostname mappings.</div></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="2230" height="295" alt="Screenshot 2026-02-05 091824" src="https://github.com/user-attachments/assets/8533d07e-0415-49c0-856f-61e9c0f3ee6e" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h3 id="step-4-network-verification" class="animate">Step 4: Network Verification</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>ip addr show</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Displays all network interfaces and their assigned IP addresses to verify the static IP configuration.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Confirms the 192.168.200.3 IP is correctly assigned to the interface.</div></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="2535" height="819" alt="Screenshot 2026-02-05 092005" src="https://github.com/user-attachments/assets/6e3beb8e-8abb-4896-904c-dc7505d93abb" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>ip route</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Shows the routing table to verify the default gateway is present, which is essential for external communication.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Displays the current network routes and gateways.</div></div>
+    <div class="notes-alert" style="margin: 1.5rem 0 0;"><p>If you do not see a "default via" line, the server will not be able to reach the internet or other networks.</p></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo ip route add default via 192.168.200.1 dev enp0s3</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Manually restores the default gateway if it was missing after hostname changes.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">The default route is added back to the routing table.</div></div>
+    <div class="notes-alert" style="margin: 1.5rem 0 0;"><p>Most VirtualBox NAT networks use 192.168.200.1 as the gateway. Only run this if the route was missing.</p></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="2216" height="150" alt="image" src="https://github.com/user-attachments/assets/1e953ed2-3539-4ebe-be22-629dccde2c2a" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>ping -c 3 8.8.8.8</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Tests basic internet connectivity by sending ICMP echo requests to Google's public DNS.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Shows packet transmission and reception status (noting NAT limitations).</div></div>
+    <div class="notes-alert" style="margin: 1.5rem 0 0;"><p>VirtualBox NAT networks often block ICMP (ping) packets. If this fails but `curl` works, your internet is fine.</p></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>curl -I https://google.com</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Tests web connectivity by fetching HTTP headers, providing a more reliable check than ping in NAT environments.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Displays HTTP headers, confirming the server can reach the internet.</div></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="2537" height="962" alt="image" src="https://github.com/user-attachments/assets/4e1133e9-ae51-4446-bbe1-ebbb00ac01bb" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h3 id="step-5-install-required-packages" class="animate">Step 5: Install Required Packages</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo dnf update -y</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Updates all installed packages to ensure the system is secure and running the latest available versions.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Packages are downloaded and updated automatically.</div></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="1228" height="141" alt="image" src="https://github.com/user-attachments/assets/2a8f8d8e-edb6-4eeb-baf6-3fb0dbb7d2c6" /></div>
+      <div class="img-container"><img loading="lazy" width="1629" height="1525" alt="image" src="https://github.com/user-attachments/assets/a104f412-28ff-4f0f-b09c-47ceedd0f479" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo dnf install postfix dovecot -y</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Installs Postfix (MTA for SMTP) and Dovecot (IMAP/POP3 server) for handling email transmission and retrieval.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Both mail server packages and their dependencies are installed.</div></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="1178" height="78" alt="image" src="https://github.com/user-attachments/assets/90f9cce7-ce3a-4178-b3da-1954ab372e5a" /></div>
+      <div class="img-container"><img loading="lazy" width="2538" height="1494" alt="image" src="https://github.com/user-attachments/assets/52e82512-7dd5-4b52-b4c9-791dc0e029bb" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>rpm -qa | grep postfix</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Verifies that the Postfix package was successfully installed on the system.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Outputs the specific version of Postfix currently installed.</div></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="1277" height="238" alt="image" src="https://github.com/user-attachments/assets/c68570a5-3b9b-4977-b4c2-7654ac2dc420" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>rpm -qa | grep dovecot</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Verifies that Dovecot and its core components were successfully installed.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Outputs a list of installed Dovecot-related packages.</div></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="1219" height="252" alt="image" src="https://github.com/user-attachments/assets/8fe362b6-1953-46b4-b313-b3470840436c" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h2 id="phase-2-ssl-tls-certificate-generation" class="animate">Phase 2: SSL/TLS Certificate Generation</h2>
+<h3 id="step-6-generate-self-signed-certificate" class="animate">Step 6: Generate Self-Signed Certificate</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** Generate Self-Signed Certificate with <code>openssl</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Creates a 365-day self-signed SSL/TLS certificate for secure SMTP/IMAP communication, using the FQDN for the Common Name.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">The `bnaserver.pem` (certificate) and `bnaserver.key` (private key) files are generated.</div></div>
+    <div class="notes-alert" style="margin: 1.5rem 0 0;"><p>You must enter the server FQDN (`bnaserver.bungkus.org`) when prompted for the "Common Name".</p></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo ls -l /etc/pki/tls/certs/bnaserver.pem</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Verifies that the certificate file was created and confirms its default permissions and file size.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Shows the file metadata for the new certificate.</div></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="2151" height="221" alt="image" src="https://github.com/user-attachments/assets/939e5428-cfc4-41d4-b416-6195794bd76f" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo ls -l /etc/pki/tls/private/bnaserver.key</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Verifies the creation of the sensitive private key file before setting restrictive permissions.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Shows the file metadata for the new private key.</div></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="2197" height="233" alt="image" src="https://github.com/user-attachments/assets/c80f46f5-b5b2-42c4-bd75-c347fac25ea2" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h3 id="step-7-set-proper-certificate-permissions" class="animate">Step 7: Set Proper Certificate Permissions</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo chmod 600 /etc/pki/tls/private/bnaserver.key</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Secures the private key by restricting read/write access to the root user only, preventing unauthorized decryption of traffic.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Private key permissions are successfully changed to 600.</div></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="2022" height="153" alt="image" src="https://github.com/user-attachments/assets/2d307ef2-ee57-4948-8d8a-ba706d7ede6c" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo chmod 644 /etc/pki/tls/certs/bnaserver.pem</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Sets the certificate permissions to readable for all users, allowing mail clients to download and trust the public key.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Certificate permissions are successfully changed to 644.</div></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="1979" height="181" alt="image" src="https://github.com/user-attachments/assets/ebdd51e8-4058-40b6-8d02-644911eb3f50" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo openssl x509 -in ... -text -noout</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Displays human-readable details of the certificate to verify the Common Name (CN), validity dates, and issuer.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Confirms the certificate details match the server's configuration.</div></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="2114" height="63" alt="image" src="https://github.com/user-attachments/assets/18269c2f-8ed9-41d7-b0e3-abd2d3983913" /></div>
+      <div class="img-container"><img loading="lazy" width="1063" height="1352" alt="image" src="https://github.com/user-attachments/assets/73b35baa-b961-49e0-9f2c-3cbc19ea5a53" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h2 id="phase-3-postfix-configuration" class="animate">Phase 3: Postfix Configuration</h2>
+<h3 id="step-8-backup-original-configuration" class="animate">Step 8: Backup Original Configuration</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo cp /etc/postfix/main.cf /etc/postfix/main.cf.backup</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Creates a backup of the original Postfix configuration file before making any changes.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">The original configuration is preserved as `main.cf.backup`.</div></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="2173" height="174" alt="image" src="https://github.com/user-attachments/assets/1e6e8fb5-42d9-4114-b741-dd34f94395e4" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>ls -l /etc/postfix/main.cf*</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Lists the configuration files to verify that the backup successfully exists.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Shows both the current configuration and the backup file in the directory.</div></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="2012" height="351" alt="image" src="https://github.com/user-attachments/assets/bc5f6f55-c48f-47ad-a1c8-2b9124c77d1a" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h3 id="step-9-edit-postfix-main-configuration" class="animate">Step 9: Edit Postfix Main Configuration</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo nano /etc/postfix/main.cf</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Opens the main Postfix configuration file for editing to define server behavior.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">The `main.cf` file is opened for modification.</div></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="1468" height="109" alt="image" src="https://github.com/user-attachments/assets/408fa42a-38e5-45c6-9ce0-bb9a892bc7e8" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Configuration to Add/Modify:</strong></p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem">Find or add these lines (use Ctrl+W to search in nano):</p>
+<div class="cmd-block animate"><button class="cmd-copy">Copy</button><pre><code># Basic Settings
+myhostname = bnaserver.bungkus.org
+mydomain = bungkus.org
+myorigin = $mydomain
+inet_interfaces = all
+mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
+home_mailbox = Maildir/
+
+# Network Settings
+mynetworks = 192.168.200.0/24, 127.0.0.0/8
+
+# TLS/SSL Settings
+smtpd_tls_cert_file = /etc/pki/tls/certs/bnaserver.pem
+smtpd_tls_key_file = /etc/pki/tls/private/bnaserver.key
+smtpd_tls_security_level = may
+smtpd_tls_auth_only = yes
+smtpd_tls_loglevel = 1
+
+# SASL Authentication
+smtpd_sasl_type = dovecot
+smtpd_sasl_path = private/auth
+smtpd_sasl_auth_enable = yes
+smtpd_sasl_security_options = noanonymous
+smtpd_sasl_local_domain = $myhostname
+broken_sasl_auth_clients = yes
+
+
+# Mailbox Format
+home_mailbox = Maildir/
+</code></pre></div>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Explanation of Each Section:</strong></p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Basic Settings:</strong></p>
+<li class="animate" style="color:var(--text-secondary); margin-left:1.5rem; margin-bottom:0.5rem"><code>myhostname</code>: Server's FQDN - identifies the server in SMTP conversations</li>
+<li class="animate" style="color:var(--text-secondary); margin-left:1.5rem; margin-bottom:0.5rem"><code>mydomain</code>: Base domain name</li>
+<li class="animate" style="color:var(--text-secondary); margin-left:1.5rem; margin-bottom:0.5rem"><code>myorigin</code>: Domain to append to mail from local users</li>
+<li class="animate" style="color:var(--text-secondary); margin-left:1.5rem; margin-bottom:0.5rem"><code>inet_interfaces</code>: Which network interfaces to listen on (all = all interfaces)</li>
+<li class="animate" style="color:var(--text-secondary); margin-left:1.5rem; margin-bottom:0.5rem"><code>mydestination</code>: Domains this server accepts mail for (as final destination)</li>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Network Settings:</strong></p>
+<li class="animate" style="color:var(--text-secondary); margin-left:1.5rem; margin-bottom:0.5rem"><code>mynetworks</code>: Trusted networks that can relay mail (your local network + localhost)</li>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>TLS/SSL Settings:</strong></p>
+<li class="animate" style="color:var(--text-secondary); margin-left:1.5rem; margin-bottom:0.5rem"><code>smtpd_tls_cert_file</code>: Path to your SSL certificate (public key)</li>
+<li class="animate" style="color:var(--text-secondary); margin-left:1.5rem; margin-bottom:0.5rem"><code>smtpd_tls_key_file</code>: Path to your private key</li>
+<li class="animate" style="color:var(--text-secondary); margin-left:1.5rem; margin-bottom:0.5rem"><code>smtpd_tls_security_level = may</code>: Offer STARTTLS but don't require it (for port 25)</li>
+<li class="animate" style="color:var(--text-secondary); margin-left:1.5rem; margin-bottom:0.5rem"><code>smtpd_tls_auth_only = yes</code>: Only allow authentication over encrypted connections</li>
+<li class="animate" style="color:var(--text-secondary); margin-left:1.5rem; margin-bottom:0.5rem"><code>smtpd_tls_loglevel</code>: How much TLS info to log (1 = basic)</li>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>SASL Authentication:</strong></p>
+<li class="animate" style="color:var(--text-secondary); margin-left:1.5rem; margin-bottom:0.5rem"><code>smtpd_sasl_type = dovecot</code>: Use Dovecot for authentication</li>
+<li class="animate" style="color:var(--text-secondary); margin-left:1.5rem; margin-bottom:0.5rem"><code>smtpd_sasl_path</code>: Socket path where Dovecot auth is listening</li>
+<li class="animate" style="color:var(--text-secondary); margin-left:1.5rem; margin-bottom:0.5rem"><code>smtpd_sasl_auth_enable</code>: Enable SASL authentication</li>
+<li class="animate" style="color:var(--text-secondary); margin-left:1.5rem; margin-bottom:0.5rem"><code>smtpd_sasl_security_options</code>: Disable anonymous authentication</li>
+<li class="animate" style="color:var(--text-secondary); margin-left:1.5rem; margin-bottom:0.5rem"><code>broken_sasl_auth_clients</code>: Support for older mail clients</li>
+<div class="img-container animate" style="margin: 2rem 0;"><img width="1918" height="502" alt="image" src="https://github.com/user-attachments/assets/401ac7fe-11ec-4ef3-81d6-ef4a18e0672d" /></div>
+<div class="img-container animate" style="margin: 2rem 0;"><img width="634" height="95" alt="image" src="https://github.com/user-attachments/assets/5818ad15-fae4-48c7-93cf-c8413947261f" /></div>
+<div class="img-container animate" style="margin: 2rem 0;"><img width="668" height="123" alt="image" src="https://github.com/user-attachments/assets/f197d458-7499-4c70-ae30-bf0c621b4aeb" /></div>
+<div class="img-container animate" style="margin: 2rem 0;"><img width="2040" height="241" alt="image" src="https://github.com/user-attachments/assets/a2938f7a-5519-428a-ae64-5f5798c5f2df" /></div>
+<div class="img-container animate" style="margin: 2rem 0;"><img width="1278" height="94" alt="image" src="https://github.com/user-attachments/assets/f04e2711-ee3d-48ab-adc5-0b575d30f5f9" /></div>
+<div class="img-container animate" style="margin: 2rem 0;"><img width="1791" height="427" alt="image" src="https://github.com/user-attachments/assets/7367692e-2960-444c-8928-27797386931d" /></div>
+<div class="img-container animate" style="margin: 2rem 0;"><img width="865" height="127" alt="image" src="https://github.com/user-attachments/assets/d6c4408d-056e-4499-a1a7-895852f953be" /></div>
+<div class="img-container animate" style="margin: 2rem 0;"><img width="1176" height="355" alt="image" src="https://github.com/user-attachments/assets/aacf0735-c688-41ff-8ac2-91c894df3a57" /></div>
+<div class="img-container animate" style="margin: 2rem 0;"><img width="779" height="155" alt="image" src="https://github.com/user-attachments/assets/ded09ec8-4802-4de9-b94f-88f8f8581bc0" /></div>
+<div class="section-divider"></div>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Action:</strong> Save changes in nano (<code>Ctrl+O</code>, <code>Enter</code>) and Exit (<code>Ctrl+X</code>)</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Purpose:</strong> Commits the Postfix main configuration changes to the disk and returns to the terminal.</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Result:</strong> Configuration files are updated and the editor closes.</p>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo postconf -n</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Displays only the customized (non-default) settings in Postfix to verify configuration accuracy.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Shows a clean list of all manual Postfix configuration changes.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h3 id="step-10-configure-postfix-master-ports-configuration" class="animate">Step 10: Configure Postfix Master (Ports Configuration)</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo cp /etc/postfix/master.cf /etc/postfix/master.cf.backup</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Creates a backup of the master service configuration file before enabling mail submission ports.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">The `master.cf.backup` file is successfully created.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo nano /etc/postfix/master.cf</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Opens the Postfix master configuration file to configure specific network services and ports.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">The `master.cf` file is opened for editing.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Action:</strong> Configure Port 587 (Submission) sections in <code>master.cf</code>.</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Purpose:</strong> Enables SMTP submission on port 587 with mandatory STARTTLS encryption and Dovecot SASL authentication.</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Result:</strong> Postfix is now configured to handle secure client mail submission on port 587.</p>
+<div class="section-divider"></div>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Action:</strong> Configure Port 465 (SMTPS) sections in <code>master.cf</code>.</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Purpose:</strong> Enables SMTPS on port 465 using an immediate TLS wrapper for secure communication with older or specific clients.</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Result:</strong> Postfix is now configured to handle immediate TLS connections on port 465.</p>
+<div class="section-divider"></div>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Action:</strong> Save and Exit nano for <code>master.cf</code>.</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Purpose:</strong> Saves the port configuration and returns to the command prompt.</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Result:</strong> Port settings for 587 and 465 are finalized.</p>
+<div class="section-divider"></div>
+<h2 id="phase-4-dovecot-configuration" class="animate">Phase 4: Dovecot Configuration</h2>
+<h3 id="step-11-configure-dovecot-mail-location" class="animate">Step 11: Configure Dovecot Mail Location</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo nano /etc/dovecot/conf.d/10-mail.conf</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Configures Dovecot to use the Maildir format in user home directories, matching the Postfix configuration.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">The Dovecot mail configuration file is opened.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Action:</strong> Set <code>mail_location = maildir:~/Maildir</code></p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Purpose:</strong> Directs Dovecot to store and retrieve emails from the <code>Maildir</code> folder within each user's home directory.</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Result:</strong> Dovecot is successfully synchronized with Postfix's storage format.</p>
+<div class="section-divider"></div>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Action:</strong> Save and exit Dovecot mail configuration.</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Purpose:</strong> Commits the mail location change.</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Result:</strong> Dovecot mail location is updated.</p>
+<div class="section-divider"></div>
+<h3 id="step-12-configure-dovecot-ssl" class="animate">Step 12: Configure Dovecot SSL</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo nano /etc/dovecot/conf.d/10-ssl.conf</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Opens Dovecot's SSL configuration to define certificate paths and encryption requirements.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">The Dovecot SSL configuration file is opened.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Action:</strong> Set SSL requirements and specify paths to <code>bnaserver.pem</code> and <code>bnaserver.key</code>.</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Purpose:</strong> Secures Dovecot connections using the generated SSL/TLS certificates and forces encrypted communication.</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Result:</strong> Dovecot is configured to use the server's private key and certificate for IMAP traffic.</p>
+<div class="section-divider"></div>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Action:</strong> Save and exit Dovecot SSL configuration.</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Purpose:</strong> Commits the SSL/TLS settings.</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Result:</strong> SSL is enabled for Dovecot IMAP services.</p>
+<div class="section-divider"></div>
+<h3 id="step-13-configure-dovecot-authentication" class="animate">Step 13: Configure Dovecot Authentication</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo nano /etc/dovecot/conf.d/10-auth.conf</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Configures user authentication mechanisms and restricts login security.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">The Dovecot authentication configuration file is opened.</div></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="2559" height="1572" alt="image" src="https://github.com/user-attachments/assets/30bfec94-e90a-40af-b5a5-9f789b63797d" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Action:</strong> Enable <code>disable_plaintext_auth = yes</code> and <code>auth_mechanisms = plain login</code>.</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Purpose:</strong> Disallows passwords over unencrypted links and defines the allowed SASL mechanisms for client logins.</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Result:</strong> Authentication security is enforced.</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Notes:</strong> Disabling plaintext auth ensures that user passwords cannot be intercepted in transit.</p>
+<div class="section-divider"></div>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Save and exit</strong></p>
+<div class="section-divider"></div>
+<h3 id="step-14-configure-dovecot-for-postfix-sasl" class="animate">Step 14: Configure Dovecot for Postfix SASL</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo nano /etc/dovecot/conf.d/10-master.conf</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Configures the Dovecot master listener to provide an authentication socket for Postfix.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">The Dovecot master configuration file is opened.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Action:</strong> Configure the <code>service auth</code> section with a unix-listener for Postfix.</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Purpose:</strong> Establishes a secure communication bridge so Postfix can use Dovecot to verify user credentials.</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Result:</strong> Postfix is now integrated with Dovecot for unified authentication.</p>
+<div class="section-divider"></div>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Save and exit</strong></p>
+<div class="section-divider"></div>
+<h2 id="phase-5-firewall-configuration" class="animate">Phase 5: Firewall Configuration</h2>
+<h3 id="step-15-configure-firewalld" class="animate">Step 15: Configure Firewalld</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo firewall-cmd --list-all</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Checks the current firewall configuration to see active services and ports before applying changes.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Displays the initial firewall status.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo firewall-cmd --permanent --add-service=smtp</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Permits incoming SMTP traffic on port 25 through the firewall.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">The SMTP service is added to the permanent firewall rules.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo firewall-cmd --permanent --add-service=smtps</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Permits incoming SMTPS traffic on port 465 through the firewall.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">The SMTPS service is added to the permanent firewall rules.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo firewall-cmd --permanent --add-port=587/tcp</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Permits incoming mail submission traffic on port 587.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Port 587 is added to the permanent firewall rules.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo firewall-cmd --permanent --add-port=143/tcp</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Permits incoming IMAP retrieval traffic on port 143.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Port 143 is added to the permanent firewall rules.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo firewall-cmd --permanent --add-port=993/tcp</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Permits incoming IMAPS retrieval traffic on port 993.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Port 993 is added to the permanent firewall rules.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo firewall-cmd --reload</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Applies all the new permanent firewall rules immediately.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">The firewall configuration is reloaded and active.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo firewall-cmd --list-all</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Verifies that all intended mail services and ports are now permitted in the active firewall configuration.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Confirms ports 25, 465, 587, 143, and 993 are open.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h2 id="phase-6-start-and-enable-services" class="animate">Phase 6: Start and Enable Services</h2>
+<h3 id="step-16-start-postfix" class="animate">Step 16: Start Postfix</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo systemctl start postfix</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Starts the Postfix mail server service to begin handling SMTP traffic.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">The Postfix service starts immediately.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo systemctl status postfix</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Verifies that Postfix is currently active and running without initialization errors.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Service status is confirmed as "active (running)".</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo systemctl enable postfix</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Configures the Postfix service to start automatically during the system boot process.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Autostart for Postfix is enabled.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h3 id="step-17-start-dovecot" class="animate">Step 17: Start Dovecot</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo systemctl start dovecot</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Starts the Dovecot IMAP server service to allow for mail retrieval.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">The Dovecot service starts immediately.</div></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="1451" height="221" alt="image" src="https://github.com/user-attachments/assets/bcfa87a8-d66d-45e8-8f4c-a8bb9e80f8a2" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo systemctl status dovecot</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Verifies the operational status of Dovecot and checks for any startup errors.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Service status is confirmed as "active (running)".</div></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="2537" height="1230" alt="image" src="https://github.com/user-attachments/assets/a6bc8901-1216-4a76-9af8-d72c668f7745" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo systemctl enable dovecot</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Configures Dovecot to start automatically whenever the system boots.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Autostart for Dovecot is enabled.</div></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="2530" height="286" alt="image" src="https://github.com/user-attachments/assets/7c120649-aa1a-48a5-a5cb-cad56e253b98" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h2 id="phase-7-verification" class="animate">Phase 7: Verification</h2>
+<h3 id="step-18-verify-listening-ports" class="animate">Step 18: Verify Listening Ports</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>ss -tuln | grep -E '25|465|587|143|993'</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Displays all listening TCP ports to verify the server is correctly bound to all 5 required mail services.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Displays port 25, 465, 587, 143, and 993 in "LISTEN" status.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo netstat -tlnp | grep -E 'postfix|dovecot'</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Identifies which specific processes are listening on the mail ports to confirm service binding.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Verifies that Postfix handles SMTP ports and Dovecot handles IMAP ports.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h3 id="step-19-test-local-smtp-port-25" class="animate">Step 19: Test Local SMTP (Port 25)</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>telnet localhost 25</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Tests local unencrypted SMTP connectivity to verify the service is accepting connections and showing the correct banner.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">The Postfix banner appears, confirming port 25 is active.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h3 id="step-20-test-smtp-with-starttls" class="animate">Step 20: Test SMTP with STARTTLS</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>openssl s_client -connect localhost:25 -starttls smtp</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Verifies that the server correctly upgrades a connection on port 25 to TLS using the STARTTLS command.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Confirms a successful SSL handshake and checks certificate validity.</div></div>
+    <div class="notes-alert" style="margin: 1.5rem 0 0;"><p>Type `QUIT` and press Enter to close the connection after verifying success.</p></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h3 id="step-21-test-smtps-port-465" class="animate">Step 21: Test SMTPS (Port 465)</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>openssl s_client -connect localhost:465</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Verifies SMTPS connectivity on port 465, which uses immediate TLS encryption.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Secure connection is established immediately after connecting.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h3 id="step-22-test-submission-port-587" class="animate">Step 22: Test Submission (Port 587)</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>openssl s_client -connect localhost:587 -starttls smtp</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Verifies that the mail submission port (587) is correctly configured for secure communication.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Confirms successful secure connectivity for client mail submission.</div></div>
+    <div class="notes-alert" style="margin: 1.5rem 0 0;"><p>This port is specifically used for mail submission from clients like Thunderbird.</p></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h3 id="step-23-test-imaps-port-993" class="animate">Step 23: Test IMAPS (Port 993)</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>openssl s_client -connect localhost:993</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Connects to the IMAPS port (993) to verify that Dovecot is providing encrypted IMAP services.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Receives the secure Dovecot banner, confirming port 993 is operational.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h3 id="step-24-send-test-email-locally" class="animate">Step 24: Send Test Email Locally</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** Send Test Email via <code>openssl</code> (Port 25)</code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Performs a complete end-to-end SMTP transaction locally to ensure the server can accept and process mail.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">The email is successfully accepted by the server and assigned a Queue ID.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Then type these SMTP commands:</strong></p>
+<div class="cmd-block animate"><button class="cmd-copy">Copy</button><pre><code>EHLO localhost
+MAIL FROM:<dineesh@bungkus.org>
+RCPT TO:<dineesh@bungkus.org>
+DATA
+Subject: Test Email from SMTP Lab
+
+This is a test email to verify the mail server is working.
+.
+QUIT</code></pre></div>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Purpose:</strong> Interacts with the SMTP server manually to send a test message using standard SMTP commands (EHLO, MAIL FROM, RCPT TO, DATA).</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Result:</strong> End-to-end SMTP delivery is validated.</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Notes:</strong> Pay close attention to the <code>.</code> (period) which must be on its own line to signal the end of the email content.</p>
+<div class="img-container animate" style="margin: 2rem 0;"><img width="856" height="741" alt="image" src="https://github.com/user-attachments/assets/1a4e170e-a249-42ab-a031-94411f15f9e2" /></div>
+<div class="img-container animate" style="margin: 2rem 0;"><img width="1733" height="650" alt="image" src="https://github.com/user-attachments/assets/57b2eeb8-aec2-4ee8-8936-ea4ab1b815fa" /></div>
+<div class="section-divider"></div>
+<h3 id="step-25-verify-email-was-queued" class="animate">Step 25: Verify Email Was Queued</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo mailq</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Examines the mail queue to ensure the test email was successfully handed off for delivery and isn't stuck.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Shows the current state of the mail queue (empty means processed).</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo tail -20 /var/log/maillog</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Reviews the backend mail logs to trace the processing and final delivery status of the test email.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Confirms the email was "sent" or "delivered" to the local mailbox.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h3 id="step-26-retrieve-email-via-imap" class="animate">Step 26: Retrieve Email via IMAP</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>openssl s_client -connect localhost:993 -quiet</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Connects to IMAP securely to test the retrieval of the locally sent test email.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Secure IMAP session is opened.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Action:</strong> Execute IMAP commands (<code>A1 LOGIN</code>, <code>A2 SELECT INBOX</code>, <code>A3 FETCH</code>, <code>A4 LOGOUT</code>).</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Purpose:</strong> Authenticates with Dovecot and retrieves the specific test email to verify correct IMAP functionality.</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Result:</strong> The full test email content is displayed in the terminal.</p>
+<div class="section-divider"></div>
+<h2 id="rocky-server-setup-complete" class="animate">🎉 Rocky Server Setup Complete</h2>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem">Your Rocky Linux mail server is now fully configured and tested!</p>
+<div class="section-divider"></div>
+<h1 id="part-2-ubuntu-client-setup" class="main-heading animate">PART 2: UBUNTU CLIENT SETUP</h1>
+<h2 id="phase-8-ubuntu-client-configuration" class="animate">Phase 8: Ubuntu Client Configuration</h2>
+<h3 id="step-27-configure-hosts-file-on-ubuntu" class="animate">Step 27: Configure Hosts File on Ubuntu</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo nano /etc/hosts</code> (on Ubuntu)</code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Opens the Ubuntu client's hosts file to add an entry for the Rocky Linux mail server.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">The hosts file is opened for editing.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Action:</strong> Add entry <code>192.168.200.3 bnaserver.bungkus.org</code>.</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Purpose:</strong> Enables the Ubuntu client to resolve the mail server's hostname to its static IP address.</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Result:</strong> Static name resolution for the server is configured on the client.</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Save and exit</strong></p>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>cat /etc/hosts</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Verifies that the mail server mapping was saved correctly in the Ubuntu host file.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Displays the updated hosts file content.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h3 id="step-27-test-connectivity-to-mail-server" class="animate">Step 27: Test Connectivity to Mail Server</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>ping -c 3 bnaserver.bungkus.org</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Verifies network connectivity and name resolution from the Ubuntu client to the mail server.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Confirms the client can reach the server by its FQDN.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>telnet bnaserver.bungkus.org 25</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Tests TCP connectivity to the SMTP service from the client machine.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Receives the mail server banner, confirming the port is accessible.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>openssl s_client -connect bnaserver.bungkus.org:993</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Verifies secure communication and checks the remote SSL certificate from the client perspective.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Establishes a secure TLS connection to the Dovecot service.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h2 id="phase-9-thunderbird-installation" class="animate">Phase 9: Thunderbird Installation</h2>
+<h3 id="step-28-download-thunderbird" class="animate">Step 28: Download Thunderbird</h3>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>If using browser:</strong></p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem">Visit: <https://www.thunderbird.net/></p>
+<div class="img-container animate" style="margin: 2rem 0;"><img width="2539" height="233" alt="image" src="https://github.com/user-attachments/assets/2a12d926-7766-44c1-b39e-c82aa1fca3de" /></div>
+<div class="img-container animate" style="margin: 2rem 0;"><img width="2426" height="1238" alt="image" src="https://github.com/user-attachments/assets/3700c775-d24f-453d-ad1d-c8aa2041d4a1" /></div>
+<div class="section-divider"></div>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Action:</strong> Download latest Thunderbird archive.</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Purpose:</strong> Acquires the installation files for the Thunderbird mail client.</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>Result:</strong> The archive is downloaded to the local workstation.</p>
+<div class="img-container animate" style="margin: 2rem 0;"><img width="1244" height="344" alt="image" src="https://github.com/user-attachments/assets/c758ba46-3a07-432b-8eb6-5e049d8dd2ea" /></div>
+<div class="section-divider"></div>
+<h3 id="step-29-extract-thunderbird" class="animate">Step 29: Extract Thunderbird</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>tar -xvf thunderbird*.tar.xz</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Extracts the Thunderbird application files from the downloaded archive.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Application files are extracted into a `thunderbird` directory.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>ls -la thunderbird/</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Verifies that the extraction was successful by listing the resulting directory structure.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Shows the binary and resource files for Thunderbird.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h3 id="step-30-install-thunderbird" class="animate">Step 30: Install Thunderbird</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo mv thunderbird /opt/</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Installs Thunderbird by moving its folder to the standard `/opt/` location for third-party software.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Thunderbird application folder is relocated to the system directory.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo ln -sf /opt/thunderbird/thunderbird /usr/bin/thunderbird</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Creates a symbolic link in the system path to allow launching Thunderbird from the terminal using a simple command.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">A global execution link for Thunderbird is established.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>which thunderbird</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Verifies that the symbolic link is correctly configured and pointing to the expected binary path.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Displays the path `/usr/bin/thunderbird`.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h3 id="step-31-launch-thunderbird" class="animate">Step 31: Launch Thunderbird</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>thunderbird &</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Launches the Thunderbird application in the background to begin the graphical configuration process.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">The Thunderbird application window opens while keeping the terminal active.</div></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h2 id="phase-10-certificate-import-thunderbird-configuration" class="animate">Phase 10: Certificate Import & Thunderbird Configuration</h2>
+<h3 id="step-32-transfer-certificate-to-client" class="animate">Step 32: Transfer Certificate to Client</h3>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>On Rocky Linux (Server):</strong></p>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo firewall-cmd --add-port=80/tcp</code> (on Server)</code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Temporarily opens port 80 to allow the Ubuntu client to download the SSL certificate file.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Port 80 is opened in the server's firewall.</div></div>
+    <div class="notes-alert" style="margin: 1.5rem 0 0;"><p>Opening port 80 is a temporary measure designed solely for certificate retrieval by the client.</p></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>sudo python3 -m http.server 80</code> (on Server)</code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Launches a temporary web server to host the certificate file for retrieval by the client machine.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">The certificate directory is served over HTTP.</div></div>
+    <div class="notes-alert" style="margin: 1.5rem 0 0;"><p>Press `Ctrl+C` in the terminal to stop the web server once the file has been downloaded.</p></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem"><strong>On Ubuntu (Client):</strong></p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem">1. Open Firefox</p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem">2. Visit: <code>http://192.168.200.3/bnaserver.pem</code></p>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem">3. Save the file to <strong>Downloads</strong></p>
+<div class="img-container animate" style="margin: 2rem 0;"><img width="800" height="264" alt="image" src="https://github.com/user-attachments/assets/93db93a7-2124-41b8-bbcb-7e6ba6f6744e" /></div>
+<div class="section-divider"></div>
+<h3 id="step-33-import-certificate-to-thunderbird" class="animate">Step 33: Import Certificate to Thunderbird</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** <code>thunderbird &</code></code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Launches Thunderbird to begin importing the certificate and configuring the user account.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Thunderbird launches.</div></div>
+  </div>
+</div>
+<h3 id="step-34-configure-account-server-settings" class="animate">Step 34: Configure Account & Server Settings</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** Configure account details and enter server settings manually in Thunderbird.</code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Establishes the connection parameters for the dineesh account using the specified SMTP and IMAP ports.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Server settings are accepted and advanced configuration begins.</div></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="983" height="874" alt="image" src="https://github.com/user-attachments/assets/66a1d0f6-9d21-4e95-8101-c071bb5484c5" /></div>
+      <div class="img-container"><img loading="lazy" width="973" height="341" alt="image" src="https://github.com/user-attachments/assets/7ba92fd4-e9b9-4f3a-a28e-9c49df315792" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h3 id="step-35-import-certificate-disable-ocsp" class="animate">Step 35: Import Certificate & Disable OCSP</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** Disable OCSP checks and import the <code>bnaserver.pem</code> certificate into the Authorities tab.</code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Ensures Thunderbird trusts the self-signed certificate and doesn't attempt external revocation queries.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">The server's identity is verified and trusted by the client application.</div></div>
+    <div class="notes-alert" style="margin: 1.5rem 0 0;"><p>Ensure you import the certificate into the "Authorities" tab and check "Trust this CA to identify websites" or similar options if prompted.</p></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="997" height="225" alt="image" src="https://github.com/user-attachments/assets/a6f4e624-2387-48eb-a8b2-85fbcbfdace8" /></div>
+      <div class="img-container"><img loading="lazy" width="990" height="554" alt="image" src="https://github.com/user-attachments/assets/69148fca-4da8-4fdc-b2dd-b577733fadc4" /></div>
+      <div class="img-container"><img loading="lazy" width="984" height="226" alt="image" src="https://github.com/user-attachments/assets/e451f9f7-ea66-4393-864f-018107f63f72" /></div>
+      <div class="img-container"><img loading="lazy" width="1002" height="460" alt="image" src="https://github.com/user-attachments/assets/a5809c86-8af8-4bc0-87d0-811412438257" /></div>
+      <div class="img-container"><img loading="lazy" width="990" height="597" alt="image" src="https://github.com/user-attachments/assets/f1d962c2-f0f1-4fe1-b6fa-77e4fc66a3c1" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h3 id="step-36-finalize-connection-handle-exception" class="animate">Step 36: Finalize Connection & Handle Exception</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** Click "Get Messages" and confirm the Security Exception.</code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Completes the first secure connection handshake by manually authorizing the self-signed certificate.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">IMAP connection is established and the inbox begins to load.</div></div>
+    <div class="notes-alert" style="margin: 1.5rem 0 0;"><p>This security warning is expected because we are using a self-signed certificate rather than one from a public Authority.</p></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="968" height="530" alt="image" src="https://github.com/user-attachments/assets/fb4bca3f-d1ec-4e41-9c47-f313cffe639b" /></div>
+      <div class="img-container"><img loading="lazy" width="988" height="771" alt="image" src="https://github.com/user-attachments/assets/41935ac1-8c77-4b88-aca4-b2a59a3a6f05" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h3 id="step-37-verify-success-send-receive" class="animate">Step 37: Verify Success (Send & Receive)</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** Write and send an email to <code>dineesh@bungkus.org</code>.</code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Verifies the complete functional flow of the mail server (sending via SMTP and receiving via IMAP).</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">The test email is sent and successfully appears in the Inbox.</div></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" width="966" height="327" alt="image" src="https://github.com/user-attachments/assets/c2eb899f-b8ba-4c1d-9eb5-17303f6c2c40" /></div>
+      <div class="img-container"><img loading="lazy" width="1718" height="491" alt="image" src="https://github.com/user-attachments/assets/73ab8fce-239a-4666-8ed5-7e52c4a8ff2c" /></div>
+      <div class="img-container"><img loading="lazy" width="2333" height="426" alt="image" src="https://github.com/user-attachments/assets/76fa8ee6-0c3f-4d84-aa47-6e7a9d33781c" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h2 id="troubleshooting-guide" class="animate">🛠️ TROUBLESHOOTING GUIDE</h2>
+<h3 id="issue-internet-connectivity-lost-after-hostname-change" class="animate">Issue: Internet Connectivity Lost After Hostname Change</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** Restore Default Gateway and DNS.</code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Fixes the common issue where `hostnamectl` sometimes resets the network routing table.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Internet connectivity is restored to the Rocky Linux server.</div></div>
+    <div class="notes-alert" style="margin: 1.5rem 0 0;"><p>If `ping 8.8.8.8` fails, try `curl -I https://github.com`. In VirtualBox NAT, ping (ICMP) is often blocked even when the internet works!</p></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" src="C:/Users/dinee/.gemini/antigravity/brain/3023262f-b312-4193-b990-a2b0103e8ba2/uploaded_media_1769599330758.png" alt="Network Connectivity Lost" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h3 id="issue-thunderbird-hangs-at-checking-password-or-no-information-available" class="animate">Issue: Thunderbird Hangs at "Checking Password" or "No Information Available"</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** Disable OCSP Checks in Thunderbird Settings.</code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Prevents Thunderbird from trying to verify a self-signed certificate against a non-existent online authority.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">The "Confirm Security Exception" dialog appears instantly, allowing you to connect.</div></div>
+    <div class="notes-alert" style="margin: 1.5rem 0 0;"><p>This is the #1 cause of infinite loading loops in lab environments.</p></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" src="C:/Users/dinee/.gemini/antigravity/brain/3023262f-b312-4193-b990-a2b0103e8ba2/uploaded_media_1769646479702.png" alt="No Information Available" /></div>
+      <div class="img-container"><img loading="lazy" src="C:/Users/dinee/.gemini/antigravity/brain/3023262f-b312-4193-b990-a2b0103e8ba2/uploaded_media_1769648967575.png" alt="Certificate Hang" /></div>
+      <div class="img-container"><img loading="lazy" src="C:/Users/dinee/.gemini/antigravity/brain/3023262f-b312-4193-b990-a2b0103e8ba2/uploaded_media_1769649140334.png" alt="Extended Hang" /></div>
+      <div class="img-container"><img loading="lazy" src="C:/Users/dinee/.gemini/antigravity/brain/3023262f-b312-4193-b990-a2b0103e8ba2/uploaded_media_1769649830233.png" alt="Checking Password Loop" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h3 id="issue-failed-to-connect-authentication-error" class="animate">Issue: Failed to Connect (Authentication Error)</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** Verify the Username Format.</code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Ensures you are using the correct credentials that Postfix/Dovecot expect.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Successful authentication and inbox synchronization.</div></div>
+    <div class="notes-alert" style="margin: 1.5rem 0 0;"><p>Do NOT use the full email (`nesh@bungkus.org`) as the username. Use only the system account name (`nesh`).</p></div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h3 id="issue-is-the-server-broken-or-the-client-local-testing" class="animate">Issue: Is the Server Broken or the Client? (Local Testing)</h3>
+<div class="step-container animate">
+  <div class="step-card">
+    <div class="step-badge">Command</div>
+    <div class="cmd-block"><button class="cmd-copy">Copy</button><code>** Test SMTP and IMAP locally using OpenSSL.</code></div>
+    <div class="info-row"><div class="info-label">Purpose</div><div class="info-val">Isolates the problem by proving the server services are healthy before troubleshooting the Ubuntu client.</div></div>
+    <div class="info-row"><div class="info-label">Result</div><div class="info-val">Confirms if Postfix (Port 25/465) and Dovecot (Port 993) are responding correctly.</div></div>
+    <div class="img-stack">
+      <div class="img-container"><img loading="lazy" src="C:/Users/dinee/.gemini/antigravity/brain/3023262f-b312-4193-b990-a2b0103e8ba2/uploaded_media_1769646934397.png" alt="SMTP Local Test" /></div>
+      <div class="img-container"><img loading="lazy" src="C:/Users/dinee/.gemini/antigravity/brain/3023262f-b312-4193-b990-a2b0103e8ba2/uploaded_media_1769647366948.png" alt="IMAP Local Test" /></div>
+    </div>
+  </div>
+</div>
+<div class="section-divider"></div>
+<h2 id="lab-complete" class="animate">🎊 LAB COMPLETE</h2>
+<p class="animate" style="color:var(--text-secondary); margin-bottom:1.5rem">You have successfully:</p>
+<div class="req-grid animate">
+<div class="req-item"><i class="fas fa-check-circle"></i><span>Configured a complete Postfix + Dovecot mail server on Rocky Linux</span></div>
+<div class="req-item"><i class="fas fa-check-circle"></i><span>Generated and configured SSL/TLS certificates</span></div>
+<div class="req-item"><i class="fas fa-check-circle"></i><span>Configured all SMTP ports (25, 465, 587) and IMAP ports (143, 993)</span></div>
+<div class="req-item"><i class="fas fa-check-circle"></i><span>Set up client on Ubuntu</span></div>
+<div class="req-item"><i class="fas fa-check-circle"></i><span>Connected Thunderbird with SSL/TLS</span></div>
+<div class="req-item"><i class="fas fa-check-circle"></i><span>Sent and received encrypted email</span></div>
+</div>
+        </main>
+    </div>
+
+    <script>
+        // Copy to clipboard
+        document.querySelectorAll('.cmd-copy').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const code = btn.nextElementSibling.innerText;
+                navigator.clipboard.writeText(code);
+                const originalText = btn.innerText;
+                btn.innerText = 'Copied!';
+                btn.style.background = '#10b981';
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.style.background = '';
+                }, 2000);
+            });
+        });
+
+        // Sidebar active link on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.getAttribute('id');
+                    if (!id) return;
+                    document.querySelectorAll('.nav-link').forEach(link => {
+                        link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+                    });
+                }
+            });
+        }, { threshold: 0.1, rootMargin: "-10% 0px -80% 0px" });
+
+        document.querySelectorAll('h1, h2, h3').forEach(h => observer.observe(h));
+        
+        // Custom smooth scroll
+        document.querySelectorAll('.nav-link').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if(targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
